@@ -4,7 +4,7 @@
     "name": "wstETH / AAVE",
     "address": "0x3de27efa2f1aa663ae5d458857e731c129069f29",
     "chain": "MAINNET",
-    "total_liquidity_usd": 11456959.15,
+    "total_liquidity_usd": 11002977.61,
     "is_paused": false,
     "version": 2
   },
@@ -13,7 +13,7 @@
     "name": "rETH / WETH",
     "address": "0x1ea5870f7c037930ce1d5d8d9317c670e89e13e3",
     "chain": "MAINNET",
-    "total_liquidity_usd": 5266922.75,
+    "total_liquidity_usd": 5185478.88,
     "is_paused": false,
     "version": 3
   },
@@ -22,16 +22,7 @@
     "name": "waUSDt / waGHO / waUSDC",
     "address": "0x85b2b559bc2d21104c4defdd6efca8a20343361d",
     "chain": "MAINNET",
-    "total_liquidity_usd": 2042944.87,
-    "is_paused": false,
-    "version": 3
-  },
-  "0x111ce2a60c30f6058a57d0dbae1a39a42d998826": {
-    "id": "0x111ce2a60c30f6058a57d0dbae1a39a42d998826",
-    "name": "msUSD / USDC",
-    "address": "0x111ce2a60c30f6058a57d0dbae1a39a42d998826",
-    "chain": "MAINNET",
-    "total_liquidity_usd": 1727782.24,
+    "total_liquidity_usd": 2043395.26,
     "is_paused": false,
     "version": 3
   },
@@ -40,16 +31,16 @@
     "name": "msY / msUSD",
     "address": "0x9054ae85300c7d3a325714fc2f1454d0b7c73a12",
     "chain": "MAINNET",
-    "total_liquidity_usd": 1676997.84,
+    "total_liquidity_usd": 1792975.33,
     "is_paused": false,
     "version": 3
   },
-  "0x57c23c58b1d8c3292c15becf07c62c5c52457a42": {
-    "id": "0x57c23c58b1d8c3292c15becf07c62c5c52457a42",
-    "name": "osETH / WETH",
-    "address": "0x57c23c58b1d8c3292c15becf07c62c5c52457a42",
+  "0x111ce2a60c30f6058a57d0dbae1a39a42d998826": {
+    "id": "0x111ce2a60c30f6058a57d0dbae1a39a42d998826",
+    "name": "msUSD / USDC",
+    "address": "0x111ce2a60c30f6058a57d0dbae1a39a42d998826",
     "chain": "MAINNET",
-    "total_liquidity_usd": 1447836.45,
+    "total_liquidity_usd": 1548219.39,
     "is_paused": false,
     "version": 3
   },
@@ -58,25 +49,16 @@
     "name": "USDt / GHO / USDC",
     "address": "0x19b001e6bc2d89154c18e2216eec5c8c6047b6d8",
     "chain": "ARBITRUM",
-    "total_liquidity_usd": 1438982.85,
+    "total_liquidity_usd": 1435867.85,
     "is_paused": false,
     "version": 3
   },
-  "0xa978cc348a0b5de8bd564a1d8fe437787fd12664": {
-    "id": "0xa978cc348a0b5de8bd564a1d8fe437787fd12664",
-    "name": "EURe / waUSDC",
-    "address": "0xa978cc348a0b5de8bd564a1d8fe437787fd12664",
-    "chain": "ARBITRUM",
-    "total_liquidity_usd": 1186966.93,
-    "is_paused": false,
-    "version": 3
-  },
-  "0x7ab124ec4029316c2a42f713828ddf2a192b36db": {
-    "id": "0x7ab124ec4029316c2a42f713828ddf2a192b36db",
-    "name": "GHO / USDC",
-    "address": "0x7ab124ec4029316c2a42f713828ddf2a192b36db",
-    "chain": "BASE",
-    "total_liquidity_usd": 1118050.08,
+  "0x57c23c58b1d8c3292c15becf07c62c5c52457a42": {
+    "id": "0x57c23c58b1d8c3292c15becf07c62c5c52457a42",
+    "name": "osETH / WETH",
+    "address": "0x57c23c58b1d8c3292c15becf07c62c5c52457a42",
+    "chain": "MAINNET",
+    "total_liquidity_usd": 1432799.42,
     "is_paused": false,
     "version": 3
   },
@@ -85,16 +67,34 @@
     "name": "TEL / WBTC",
     "address": "0xe1e09ce7aac2740846d9b6d9d56f588c65314ecb",
     "chain": "POLYGON",
-    "total_liquidity_usd": 1054166.33,
+    "total_liquidity_usd": 1212889.75,
     "is_paused": false,
     "version": 2
+  },
+  "0xa978cc348a0b5de8bd564a1d8fe437787fd12664": {
+    "id": "0xa978cc348a0b5de8bd564a1d8fe437787fd12664",
+    "name": "EURe / waUSDC",
+    "address": "0xa978cc348a0b5de8bd564a1d8fe437787fd12664",
+    "chain": "ARBITRUM",
+    "total_liquidity_usd": 1187088.64,
+    "is_paused": false,
+    "version": 3
+  },
+  "0x7ab124ec4029316c2a42f713828ddf2a192b36db": {
+    "id": "0x7ab124ec4029316c2a42f713828ddf2a192b36db",
+    "name": "GHO / USDC",
+    "address": "0x7ab124ec4029316c2a42f713828ddf2a192b36db",
+    "chain": "BASE",
+    "total_liquidity_usd": 1118193.63,
+    "is_paused": false,
+    "version": 3
   },
   "0x3bd8a254163f8328efcc4f8c36da566753462433000200000000000000000dc1": {
     "id": "0x3bd8a254163f8328efcc4f8c36da566753462433000200000000000000000dc1",
     "name": "TEL / USDC",
     "address": "0x3bd8a254163f8328efcc4f8c36da566753462433",
     "chain": "POLYGON",
-    "total_liquidity_usd": 768667.05,
+    "total_liquidity_usd": 889416.64,
     "is_paused": false,
     "version": 2
   },
@@ -103,7 +103,7 @@
     "name": "USDp / Gami-USDC",
     "address": "0x1fed8401c145f64da567881d272d0df233118dca",
     "chain": "AVALANCHE",
-    "total_liquidity_usd": 574825.58,
+    "total_liquidity_usd": 574800.27,
     "is_paused": false,
     "version": 3
   },
@@ -112,7 +112,7 @@
     "name": "TEL / WETH",
     "address": "0xca6efa5704f1ae445e0ee24d9c3ddde34c5be1c2",
     "chain": "POLYGON",
-    "total_liquidity_usd": 452503.33,
+    "total_liquidity_usd": 521728.63,
     "is_paused": false,
     "version": 2
   },
@@ -121,7 +121,7 @@
     "name": "ALCX / WETH",
     "address": "0x1535d7ca00323aa32bd62aeddf7ca651e4b95966",
     "chain": "MAINNET",
-    "total_liquidity_usd": 326409.73,
+    "total_liquidity_usd": 312756.98,
     "is_paused": false,
     "version": 3
   },
@@ -130,7 +130,7 @@
     "name": "TREE / waEthLidoWETH",
     "address": "0xdaba3d8ccf79ef289a7e2dbce51871b39ea445a2",
     "chain": "MAINNET",
-    "total_liquidity_usd": 308047.3,
+    "total_liquidity_usd": 293955.25,
     "is_paused": false,
     "version": 3
   },
@@ -139,7 +139,7 @@
     "name": "pmUSD / kpk USDC",
     "address": "0xe00e947decfe01692070e113002705bdf77ddbd3",
     "chain": "MAINNET",
-    "total_liquidity_usd": 80826.45,
+    "total_liquidity_usd": 82122.57,
     "is_paused": false,
     "version": 3
   },
@@ -148,7 +148,7 @@
     "name": "EURC / GHO",
     "address": "0x9ab907fb3e098103ca048ad26e501bf7b3dfa3eb",
     "chain": "BASE",
-    "total_liquidity_usd": 44408.82,
+    "total_liquidity_usd": 44419.72,
     "is_paused": false,
     "version": 3
   },
@@ -157,7 +157,7 @@
     "name": "USDt / GHO / USDC",
     "address": "0xfcec3c8d86329defb548202fe1b86ff2188603a8",
     "chain": "AVALANCHE",
-    "total_liquidity_usd": 18261.2,
+    "total_liquidity_usd": 18264.5,
     "is_paused": false,
     "version": 3
   },
@@ -166,7 +166,7 @@
     "name": "GHO / USDf",
     "address": "0x6c5972311191097d002e804a9bf97c96c54059ed",
     "chain": "MAINNET",
-    "total_liquidity_usd": 11814.9,
+    "total_liquidity_usd": 11820.08,
     "is_paused": false,
     "version": 3
   },
@@ -175,7 +175,7 @@
     "name": "tAVAX / waAvaSAVAX",
     "address": "0x832f8e068e92d56b94205ea605e5cdaa7cded1f0",
     "chain": "AVALANCHE",
-    "total_liquidity_usd": 11210.9,
+    "total_liquidity_usd": 10530.41,
     "is_paused": false,
     "version": 3
   },
@@ -184,7 +184,7 @@
     "name": "BOLD / USDC",
     "address": "0xc334299aef610fc79da129a920317b2bdbe2557e",
     "chain": "MAINNET",
-    "total_liquidity_usd": 10421.88,
+    "total_liquidity_usd": 10422.05,
     "is_paused": false,
     "version": 3
   },
@@ -193,7 +193,7 @@
     "name": "NERI / WETH",
     "address": "0x3f0ee252df21e324c2ed7ef267562e3651fa8785",
     "chain": "ARBITRUM",
-    "total_liquidity_usd": 8385.66,
+    "total_liquidity_usd": 8355.76,
     "is_paused": false,
     "version": 3
   },
@@ -202,7 +202,7 @@
     "name": "eeUSDC / yUSND",
     "address": "0x483bc7fe92fc392305dd97d4d3363e0e0a7f144d",
     "chain": "ARBITRUM",
-    "total_liquidity_usd": 1175.74,
+    "total_liquidity_usd": 1175.88,
     "is_paused": false,
     "version": 3
   },
