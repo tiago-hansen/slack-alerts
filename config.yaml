@@ -1,8 +1,18 @@
 # Alert thresholds for Balancer v2/v3 pool monitoring
 alerts:
   tvl_drop_threshold: 0.10 # 10% — alert when TVL drops more than this
-  tvl_spike_threshold: 0.50 # 50% — alert when TVL grows more than this
+  tvl_spike_threshold: 0.10 # 10% — alert when TVL grows more than this
   min_tvl_usd: 10000 # ignore pools with TVL below this value (USD)
+
+  # Volume swings far harder than TVL day to day, so this sits much wider.
+  # Applied as a ratio: 1.00 alerts when 24h volume doubles or halves.
+  volume_change_threshold: 1.00
+  min_volume_usd: 25000 # ignore unless either day cleared this volume (USD)
+
+  # Large add/remove liquidity flows, aggregated per pool per window.
+  flow_pct_of_tvl: 0.10 # fires at 10% of pool TVL...
+  flow_abs_usd: 250000 # ...or this absolute size, whichever hits first
+  max_lookback_hours: 168 # cap the event window after a missed run
 
 # Balancer chains to monitor (used for API queries)
 chains:
