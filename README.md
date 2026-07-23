@@ -2,10 +2,38 @@
 
 This repository runs two automated checks and posts alerts to Slack:
 
-- **Pool alerts**: monitors selected Balancer pools for TVL drops/spikes and newly paused pools.
+- **Pool alerts**: monitors selected Balancer pools for TVL moves, volume moves, large liquidity flows, and newly paused pools.
 - **Touchpoint alerts**: posts daily touchpoint reminders grouped by attendee.
 
 Both checks are designed to run in GitHub Actions on a schedule, but you can also run them locally.
+
+## Pool Alert Rules
+
+The pool list comes from the Notion pools database; each row's Balancer URL supplies the
+address, chain, and protocol version. Every rule below is evaluated per pool, per run, and
+all triggered alerts are batched into a single Slack message. Nothing is sent when none fire.
+
+| Rule | Trigger | Source |
+| --- | --- | --- |
+| TVL Drop | day-over-day TVL ≤ −10% | snapshot diff |
+| TVL Spike | day-over-day TVL ≥ +10% | snapshot diff |
+| Volume Drop | 24h volume at most half the prior 24h | `volume24h` / `volume48h` |
+| Volume Spike | 24h volume at least double the prior 24h | `volume24h` / `volume48h` |
+| Large Deposits | window `ADD` total ≥ 10% of TVL **or** ≥ $250K | `poolEvents` |
+| Large Withdrawals | window `REMOVE` total ≥ 10% of TVL **or** ≥ $250K | `poolEvents` |
+| Pool Paused | `isPaused` flips false → true | snapshot diff |
+
+Filters:
+
+- TVL rules need `max(today, yesterday) ≥ min_tvl_usd`, so a pool collapsing below the floor
+  still alerts while genuinely small pools stay quiet.
+- Volume rules need `max(today, prior day) ≥ min_volume_usd` and a non-zero prior day.
+  Volume is far noisier than TVL day to day, which is why its threshold is much wider.
+- Delta rules need the pool to be present in the previous snapshot; a pool's first run only
+  establishes a baseline.
+- The deposit/withdrawal window runs from the previous run's timestamp (recorded in the
+  snapshot under `_meta.last_run_at`) to now, so a late or retried job neither double-reports
+  flows nor skips them. It defaults to 24h and is capped at `max_lookback_hours`.
 
 ## Installation and Local Configuration
 
@@ -56,10 +84,23 @@ Note:
 ### 5) Verify static config
 
 Review `config.yaml`:
-- `alerts`: thresholds and minimum TVL filter.
+- `alerts`: alert thresholds (see below).
 - `chains`: Balancer chains queried in API.
 - `api_url`: Balancer GraphQL endpoint.
 - `snapshot_path`: path of persistent comparison snapshot.
+
+Alert threshold keys:
+
+| Key | Meaning |
+| --- | --- |
+| `tvl_drop_threshold` | fractional TVL drop that alerts (`0.10` = 10%) |
+| `tvl_spike_threshold` | fractional TVL gain that alerts |
+| `min_tvl_usd` | pools under this TVL on both days are ignored |
+| `volume_change_threshold` | day-over-day volume move that alerts, as a ratio (`1.00` = doubled or halved) |
+| `min_volume_usd` | pools under this volume on both days are ignored |
+| `flow_pct_of_tvl` | deposit/withdrawal total worth this share of TVL alerts |
+| `flow_abs_usd` | deposit/withdrawal total at or above this USD value alerts |
+| `max_lookback_hours` | ceiling on the event window after a missed run |
 
 ## Running Locally
 

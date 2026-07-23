@@ -2,13 +2,14 @@ import json
 import logging
 import os
 import sys
+import time
 from pathlib import Path
 
 import yaml
 from dotenv import load_dotenv
 
-from alerts import check_alerts
-from balancer_api import fetch_pools_by_ids, fetch_v2_pools_subgraph
+from alerts import check_alerts, check_flow_alerts
+from balancer_api import fetch_pool_events, fetch_pools_by_ids, fetch_v2_pools_subgraph
 from notion_pools import query_pool_list
 from slack_notifier import send_alerts
 
@@ -23,26 +24,74 @@ logger = logging.getLogger(__name__)
 
 CONFIG_PATH = Path(__file__).parent.parent / "config.yaml"
 
+# Reserved snapshot key holding run metadata rather than pool data.
+META_KEY = "_meta"
+SECONDS_PER_HOUR = 3600
+
 
 def load_config() -> dict:
     with open(CONFIG_PATH) as f:
         return yaml.safe_load(f)
 
 
-def load_snapshot(snapshot_path: Path) -> dict:
+def load_snapshot(snapshot_path: Path) -> tuple[dict, dict]:
+    """Return (pools keyed by pool id, run metadata) from the snapshot file."""
     if not snapshot_path.exists() or snapshot_path.stat().st_size == 0:
         logger.info("No previous snapshot found at %s — first run.", snapshot_path)
-        return {}
+        return {}, {}
     with open(snapshot_path) as f:
-        return json.load(f)
+        data = json.load(f)
+    # Snapshots written before _meta existed simply have no metadata.
+    meta = data.pop(META_KEY, {})
+    return data, meta
 
 
-def save_snapshot(snapshot_path: Path, pools: list[dict]) -> None:
+def save_snapshot(snapshot_path: Path, pools: list[dict], run_at: int) -> None:
     snapshot_path.parent.mkdir(parents=True, exist_ok=True)
-    data = {pool["id"]: pool for pool in pools}
+    data = {META_KEY: {"last_run_at": run_at}}
+    data.update({pool["id"]: pool for pool in pools})
     with open(snapshot_path, "w") as f:
         json.dump(data, f, indent=2)
     logger.info("Snapshot saved to %s (%d pools).", snapshot_path, len(pools))
+
+
+def event_window_start(meta: dict, now: int, max_lookback_hours: float) -> int:
+    """
+    Start of the add/remove event window.
+
+    Anchored to the previous run so a late or retried job neither double-reports
+    flows nor skips them, defaulting to 24h and clamped so a long outage cannot
+    trigger a huge backfill.
+    """
+    earliest = now - int(max_lookback_hours * SECONDS_PER_HOUR)
+    last_run = meta.get("last_run_at")
+    if last_run is None:
+        return now - 24 * SECONDS_PER_HOUR
+    return max(int(last_run), earliest)
+
+
+def collect_flow_alerts(
+    api_url: str,
+    pools: list[dict],
+    since_ts: int,
+    flow_pct_of_tvl: float,
+    flow_abs_usd: float,
+) -> list:
+    """Fetch add/remove events per pool and return the large-flow alerts."""
+    alerts = []
+    for pool in pools:
+        # Subgraph-sourced pools are absent from the API, so poolEvents has
+        # nothing for them; volume_24h_usd is the marker for that path.
+        if pool.get("volume_24h_usd") is None:
+            logger.debug("Skipping flow check for %s (no API event data)", pool["id"])
+            continue
+
+        adds = fetch_pool_events(api_url, pool["id"], pool["chain"], "ADD", since_ts)
+        removes = fetch_pool_events(api_url, pool["id"], pool["chain"], "REMOVE", since_ts)
+        alerts.extend(
+            check_flow_alerts(pool, adds, removes, flow_pct_of_tvl, flow_abs_usd)
+        )
+    return alerts
 
 
 def main() -> None:
@@ -71,6 +120,11 @@ def main() -> None:
     tvl_drop_threshold: float = alert_config["tvl_drop_threshold"]
     tvl_spike_threshold: float = alert_config["tvl_spike_threshold"]
     min_tvl_usd: float = alert_config["min_tvl_usd"]
+    volume_change_threshold: float = alert_config["volume_change_threshold"]
+    min_volume_usd: float = alert_config["min_volume_usd"]
+    flow_pct_of_tvl: float = alert_config["flow_pct_of_tvl"]
+    flow_abs_usd: float = alert_config["flow_abs_usd"]
+    max_lookback_hours: float = alert_config["max_lookback_hours"]
 
     logger.info("Fetching pool list from Notion")
     pool_descriptors = query_pool_list(notion_api_key, notion_pools_db_id)
@@ -78,8 +132,17 @@ def main() -> None:
         logger.warning("No pools found in Notion database. Exiting.")
         sys.exit(0)
 
+    previous_snapshot, meta = load_snapshot(snapshot_path)
+
+    # v2 pool ids are address + nonce and can't be derived from the Notion URL,
+    # so reuse the ids the last run recorded.
+    known_ids = {
+        (pool["address"].lower(), pool["chain"]): pool_id
+        for pool_id, pool in previous_snapshot.items()
+    }
+
     logger.info("Fetching pool data from Balancer API (v2+v3)")
-    current_pools = fetch_pools_by_ids(api_url, pool_descriptors, chains)
+    current_pools = fetch_pools_by_ids(api_url, pool_descriptors, chains, known_ids)
 
     # Fallback: v2 pools not found in API — fetch from v2 subgraph (Ethereum-only)
     found_keys = {(p["address"].lower(), p["chain"]) for p in current_pools}
@@ -103,7 +166,7 @@ def main() -> None:
         except Exception as exc:
             logger.warning("V2 subgraph fallback failed (skipping): %s", exc)
 
-    previous_snapshot = load_snapshot(snapshot_path)
+    run_at = int(time.time())
 
     triggered_alerts = check_alerts(
         current_pools=current_pools,
@@ -111,11 +174,19 @@ def main() -> None:
         tvl_drop_threshold=tvl_drop_threshold,
         tvl_spike_threshold=tvl_spike_threshold,
         min_tvl_usd=min_tvl_usd,
+        volume_change_threshold=volume_change_threshold,
+        min_volume_usd=min_volume_usd,
+    )
+
+    since_ts = event_window_start(meta, run_at, max_lookback_hours)
+    logger.info("Checking liquidity flows since %d (%.1fh window)", since_ts, (run_at - since_ts) / 3600)
+    triggered_alerts.extend(
+        collect_flow_alerts(api_url, current_pools, since_ts, flow_pct_of_tvl, flow_abs_usd)
     )
 
     send_alerts(slack_webhook_url, triggered_alerts)
 
-    save_snapshot(snapshot_path, current_pools)
+    save_snapshot(snapshot_path, current_pools, run_at)
 
     logger.info("Daily check complete. %d alert(s) sent.", len(triggered_alerts))
 
